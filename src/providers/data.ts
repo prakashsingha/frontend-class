@@ -14,14 +14,48 @@ export const { kyInstance } = createSimpleRestDataProvider({
 export const dataProvider: DataProvider = {
   getList: async <TData extends BaseRecord = BaseRecord>({
     resource,
+    filters,
+    pagination,
   }: GetListParams): Promise<GetListResponse<TData>> => {
     if (resource !== "subjects") {
       return { data: [] as TData[], total: 0 };
     }
 
+    let filteredData = [...MOCK_SUBJECTS];
+
+    // Apply filters
+    if (filters) {
+      for (const filter of filters) {
+        if ("field" in filter && filter.field && filter.value) {
+          filteredData = filteredData.filter((item) => {
+            const fieldValue = item[filter.field as keyof typeof item];
+            if (filter.operator === "eq") {
+              return fieldValue === filter.value;
+            }
+            if (
+              filter.operator === "contains" &&
+              typeof fieldValue === "string"
+            ) {
+              return fieldValue
+                .toLowerCase()
+                .includes(String(filter.value).toLowerCase());
+            }
+            return true;
+          });
+        }
+      }
+    }
+
+    const total = filteredData.length;
+
+    // Apply pagination
+    if (pagination?.currentPage && pagination?.pageSize) {
+      const start = (pagination.currentPage - 1) * pagination.pageSize;
+      filteredData = filteredData.slice(start, start + pagination.pageSize);
+    }
     return {
-      data: MOCK_SUBJECTS as unknown as TData[],
-      total: MOCK_SUBJECTS.length,
+      data: filteredData as unknown as TData[],
+      total,
     };
   },
   getOne: async () => {

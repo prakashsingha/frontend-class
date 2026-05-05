@@ -21,7 +21,7 @@ import React, { useMemo, useState } from "react";
 
 const SubjectsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
 
   const departmentFilters =
     selectedDepartment === "all"
@@ -131,8 +131,8 @@ const SubjectsList = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-              <CreateButton />
             </Select>
+            <CreateButton />
           </div>
         </div>
       </div>
